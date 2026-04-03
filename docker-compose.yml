@@ -1,0 +1,114 @@
+services:
+  postgres-gestao:
+    image: postgres:16-alpine
+    container_name: postgres-gestao
+    environment:
+      POSTGRES_DB: operadora_gestao
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_gestao_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d operadora_gestao"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-faturamento:
+    image: postgres:16-alpine
+    container_name: postgres-faturamento
+    environment:
+      POSTGRES_DB: operadora_faturamento
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg_faturamento_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d operadora_faturamento"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  servico-gestao:
+    build: ./servico-gestao
+    container_name: servico-gestao
+    depends_on:
+      postgres-gestao:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:postgres@postgres-gestao:5432/operadora_gestao
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      RABBITMQ_EXCHANGE: pagamentos_ex
+    ports:
+      - "3001:3001"
+
+  servico-faturamento:
+    build: ./servico-faturamento
+    container_name: servico-faturamento
+    depends_on:
+      postgres-faturamento:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:postgres@postgres-faturamento:5432/operadora_faturamento
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      RABBITMQ_EXCHANGE: pagamentos_ex
+    ports:
+      - "3002:3002"
+
+  servico-planos-ativos:
+    build: ./servico-planos-ativos
+    container_name: servico-planos-ativos
+    depends_on:
+      - redis
+      - rabbitmq
+      - servico-gestao
+    environment:
+      PORT: 3003
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      RABBITMQ_EXCHANGE: pagamentos_ex
+      GESTAO_BASE_URL: http://servico-gestao:3001
+    ports:
+      - "3003:3003"
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    depends_on:
+      - servico-gestao
+      - servico-faturamento
+      - servico-planos-ativos
+    environment:
+      PORT: 3000
+      GESTAO_URL: http://servico-gestao:3001
+      FATURAMENTO_URL: http://servico-faturamento:3002
+      PLANOS_ATIVOS_URL: http://servico-planos-ativos:3003
+    ports:
+      - "3000:3000"
+
+volumes:
+  pg_gestao_data:
+  pg_faturamento_data:

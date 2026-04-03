@@ -1,0 +1,21 @@
+{
+  "name": "servico-planos-ativos",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.5",
+    "axios": "^1.8.1",
+    "express": "^4.21.2",
+    "redis": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.11",
+    "typescript": "^5.8.2"
+  }
+}
