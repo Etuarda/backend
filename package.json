@@ -8,7 +8,7 @@
     "build:faturamento": "npm --prefix ./servico-faturamento run build",
     "build:planos-ativos": "npm --prefix ./servico-planos-ativos run build",
     "build:gateway": "npm --prefix ./api-gateway run build",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "amqplib": "^0.10.5",
