@@ -1,11 +1,13 @@
 {
-  "name": "servico-planos-ativos",
+  "name": "sistema-operadora-backend",
   "version": "1.0.0",
   "private": true,
-  "main": "dist/main.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/main.js",
+    "build": "npm --prefix ./servico-gestao run build && npm --prefix ./servico-faturamento run build && npm --prefix ./servico-planos-ativos run build && npm --prefix ./api-gateway run build",
+    "build:gestao": "npm --prefix ./servico-gestao run build",
+    "build:faturamento": "npm --prefix ./servico-faturamento run build",
+    "build:planos-ativos": "npm --prefix ./servico-planos-ativos run build",
+    "build:gateway": "npm --prefix ./api-gateway run build",
     "test": "jest"
   },
   "dependencies": {
