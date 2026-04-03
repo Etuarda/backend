@@ -23,38 +23,92 @@ Projeto backend estruturado em serviços independentes para gestão de clientes,
 
 ## Como executar
 
-### Opção recomendada
+### Com Docker Compose (recomendado)
 
 ```bash
 docker compose up --build
 ```
 
-### Endpoints expostos pelo gateway
+Isso inicia:
+- API Gateway na porta `3000`
+- Serviço de Gestão na porta `3001`
+- Serviço de Faturamento na porta `3002`
+- Serviço de Planos Ativos na porta `3003`
+- PostgreSQL (semente automática com dados)
+- RabbitMQ
+- Redis
 
-- `http://localhost:3000/gestao/clientes`
-- `http://localhost:3000/gestao/planos`
-- `http://localhost:3000/gestao/assinaturas`
-- `http://localhost:3000/gestao/planos/:idPlano`
-- `http://localhost:3000/gestao/assinaturas/:tipo`
-- `http://localhost:3000/gestao/assinaturascliente/:codcli`
-- `http://localhost:3000/gestao/assinaturasplano/:codplano`
-- `http://localhost:3000/registrarpagamento`
-- `http://localhost:3000/planosativos/:codass`
+### Localmente (sem Docker)
+
+1. **Instale as dependências**:
+```bash
+npm install
+cd servico-gestao && npm install && cd ..
+cd servico-faturamento && npm install && cd ..
+cd servico-planos-ativos && npm install && cd ..
+cd api-gateway && npm install && cd ..
+```
+
+2. **Configure bancos de dados e mensageria**:
+   - PostgreSQL rodando nas portas `5433` (gestão) e `5434` (faturamento)
+   - RabbitMQ na porta `5672`
+   - Redis na porta `6379`
+
+3. **Inicie cada serviço em um terminal separado**:
+```bash
+# Terminal 1: Gestão
+cd servico-gestao && npm run build && npm start
+
+# Terminal 2: Faturamento
+cd servico-faturamento && npm run build && npm start
+
+# Terminal 3: Planos Ativos
+cd servico-planos-ativos && npm run build && npm start
+
+# Terminal 4: Gateway
+cd api-gateway && npm run build && npm start
+```
+
+### Endpoints (via API Gateway)
+
+### Endpoints (via API Gateway)
+
+- `GET http://localhost:3000/gerenciaplanos/clientes` - Lista clientes
+- `GET http://localhost:3000/gerenciaplanos/planos` - Lista planos
+- `POST http://localhost:3000/gerenciaplanos/assinaturas` - Cria assinatura
+- `PATCH http://localhost:3000/gerenciaplanos/planos/:idPlano` - Atualiza custo do plano
+- `GET http://localhost:3000/gerenciaplanos/assinaturas/:tipo` - Lista assinaturas por tipo (ATIVOS, TODOS, CANCELADOS)
+- `GET http://localhost:3000/gerenciaplanos/asscli/:codcli` - Lista assinaturas por cliente
+- `GET http://localhost:3000/gerenciaplanos/assinaturaplano/:codplano` - Lista assinaturas por plano
+- `POST http://localhost:3000/registrarpagamento` - Registra pagamento
+- `GET http://localhost:3000/planosativos/:codass` - Consulta se assinatura está ativa (com cache)
 
 ## Fluxo básico de teste
 
-1. Listar clientes.
-2. Listar planos.
-3. Criar uma assinatura.
-4. Consultar assinaturas por tipo.
-5. Atualizar custo de plano.
-6. Registrar pagamento.
-7. Consultar se a assinatura está ativa via `planosativos`.
+1. **Listar clientes**: `GET /gerenciaplanos/clientes`
+2. **Listar planos**: `GET /gerenciaplanos/planos`
+3. **Criar uma assinatura**: `POST /gerenciaplanos/assinaturas` (com `codCli`, `codPlano`, `custoFinal`, `descricao`)
+4. **Consultar assinaturas ativas**: `GET /gerenciaplanos/assinaturas/ATIVOS`
+5. **Atualizar custo de plano**: `PATCH /gerenciaplanos/planos/1` (com `custoMensal`)
+6. **Registrar pagamento**: `POST /registrarpagamento`
+7. **Verificar se assinatura está ativa**: `GET /planosativos/:codass`
 
-## Endpoint extra documentado
+### Testes automatizados
 
-- `GET /gestao/assinaturas/:codass/ativa` (Serviço de gestão): retorna `{ ativa: true | false }` para assinatura especificada.
-- `GET /planosativos/:codass` (serviço de cache): retorna igualmente a validação com cache.
+Use a coleção Postman importando `template.postman_collection.json`:
+
+```bash
+newman run template.postman_collection.json
+```
+
+## Estrutura de camadas
+
+Cada serviço segue a arquitetura limpa com:
+
+- **domain**: Entidades e interfaces de repositório
+- **application**: Casos de uso (Use Cases)
+- **infrastructure**: Implementações de banco, cache e mensageria
+- **interfaces**: Controllers e rotas HTTP
 
 ## Diagramas UML
 

@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { GestaoController } from './GestaoController';
 
 export function buildRoutes(controller: GestaoController) {
-  console.log('building routes');
   const router = Router();
 
   router.get('/clientes', controller.listClientes);

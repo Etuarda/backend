@@ -20,7 +20,7 @@ async function bootstrap() {
       return;
     }
 
-    const response = await axios.get(`${env.gestaoBaseUrl}/gestao/assinaturas/${codAss}/ativa`);
+    const response = await axios.get(`${env.gestaoBaseUrl}/assinaturas/${codAss}/ativa`);
     const payload = { ativa: Boolean(response.data.ativa) };
 
     await redisClient.set(key, JSON.stringify(payload), { EX: 600 });

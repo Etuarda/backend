@@ -17,7 +17,6 @@ export class GestaoController {
   ) {}
 
   listClientes = async (_req: Request, res: Response) => {
-    console.log('listClientes called');
     const data = await this.listClientesUseCase.execute();
     res.json(data);
   };
