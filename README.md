@@ -48,10 +48,18 @@ Isso inicia:
 
 ```bash
 npm install
-cd servico-gestao && npm install && cd ..
-cd servico-faturamento && npm install && cd ..
-cd servico-planos-ativos && npm install && cd ..
-cd api-gateway && npm install && cd ..
+cd servico-gestao
+npm install
+cd ..
+cd servico-faturamento
+npm install
+cd ..
+cd servico-planos-ativos
+npm install
+cd ..
+cd api-gateway
+npm install
+cd ..
 ```
 
 2. Garanta a execução local de:
@@ -102,7 +110,7 @@ Observação:
 Use a coleção Postman:
 
 ```bash
-npx newman run template.postman_collection.json
+npx newman run eduarda_silva_santos_Desenvolvimento_de_Sistemas_backend_Fase-2.postman_collection.json
 ```
 
 ## Estrutura de camadas

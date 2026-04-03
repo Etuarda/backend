@@ -122,10 +122,15 @@ export class PostgresGestaoRepository implements GestaoRepository {
   }
 
   async listAssinaturasByTipo(tipo: string) {
+    const normalizedTipo = tipo.trim().toUpperCase();
     const base = await this.fetchSubscriptions();
-    if (tipo === 'TODOS') return base;
-    if (tipo === 'ATIVOS') return base.filter((item) => item.status === 'ATIVO');
-    if (tipo === 'CANCELADOS') return base.filter((item) => item.status === 'CANCELADO');
+    if (normalizedTipo === 'TODOS') return base;
+    if (normalizedTipo === 'ATIVOS' || normalizedTipo === 'ATIVAS') {
+      return base.filter((item) => item.status === 'ATIVO');
+    }
+    if (normalizedTipo === 'CANCELADOS' || normalizedTipo === 'CANCELADAS') {
+      return base.filter((item) => item.status === 'CANCELADO');
+    }
     return [];
   }
 
@@ -164,8 +169,8 @@ export class PostgresGestaoRepository implements GestaoRepository {
       const assinatura = new Assinatura(row);
       return {
         codigoAssinatura: row.codigo,
-        codCli: row.codcli,
-        codPlano: row.codplano,
+        codCli: Number(row.codcli),
+        codPlano: Number(row.codplano),
         dataInicio: row.iniciofidelidade,
         dataFim: row.fimfidelidade,
         status: assinatura.estaAtiva() ? 'ATIVO' : 'CANCELADO',
