@@ -11,6 +11,8 @@ export function buildRoutes(controller: GestaoController) {
   router.get('/assinaturas/:tipo', controller.listAssinaturasByTipo);
   router.get('/asscli/:codcli', controller.listAssinaturasByCliente);
   router.get('/assinaturaplano/:codplano', controller.listAssinaturasByPlano);
+
+  // rota auxiliar usada pelo servico-planos-ativos
   router.get('/assinaturas/:codass/ativa', controller.getAssinaturaAtiva);
 
   return router;
